@@ -3,16 +3,16 @@
 ## Contenu du Projet
 
 ### Applications Windows
-- `WAVE_Connect_Gov.exe` - Interface gouvernementale d'émission d'alertes
-- `WAVE_Recepteur.exe` - Interface de réception et monitoring des alertes
+- `WAVE_Connect_Gov.exe` - Interface Emetteur
+- `WAVE_Recepteur.exe` - Interface Récepteur
 
 ### Code Arduino/ESP8266
 - `transmetteur.cpp` - Code pour ESP8266 émetteur (avec lecteur RFID)
 - `recepteur.cpp` - Code pour ESP8266 récepteur (avec LED d'alerte)
 
 ### Code Source Python
-- `wave_connect_gov.py` - Source de l'interface gouvernementale
-- `wave_recepteur.py` - Source de l'interface de réception
+- `wave_connect_gov.py` - Source de l'interface Emetteur
+- `wave_recepteur.py` - Source de l'interface Récepteur
 
 ## Installation et Configuration
 
