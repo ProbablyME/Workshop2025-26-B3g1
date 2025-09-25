@@ -1,6 +1,4 @@
-# WAVE-CONNECT - Système d'Alerte Gouvernementale
-
-Système de communication d'urgence utilisant la technologie RFID et les fréquences 433MHz pour la diffusion d'alertes à la population.
+# WAVE-CONNECT 
 
 ## Contenu du Projet
 
