@@ -4,7 +4,7 @@ Système de communication d'urgence utilisant la technologie RFID et les fréque
 
 ## Contenu du Projet
 
-### Applications Windows (dist/)
+### Applications Windows
 - `WAVE_Connect_Gov.exe` - Interface gouvernementale d'émission d'alertes
 - `WAVE_Recepteur.exe` - Interface de réception et monitoring des alertes
 
@@ -12,30 +12,31 @@ Système de communication d'urgence utilisant la technologie RFID et les fréque
 - `transmetteur.cpp` - Code pour ESP8266 émetteur (avec lecteur RFID)
 - `recepteur.cpp` - Code pour ESP8266 récepteur (avec LED d'alerte)
 
-### Code Source Python (optionnel)
+### Code Source Python
 - `wave_connect_gov.py` - Source de l'interface gouvernementale
 - `wave_recepteur.py` - Source de l'interface de réception
 
 ## Installation et Configuration
 
-### 1. Prérequis Matériel
+### 1. Matériel utilisé
 
-#### ESP8266 Émetteur (Gouvernement)
+#### ESP8266 Émetteur 
 ```
 Composants requis:
-├── ESP8266 (NodeMCU/Wemos D1 Mini)
+├── ESP8266
 ├── Module RFID RC522
 ├── Module émetteur 433MHz
-├── LEDs (verte + rouge) - optionnel
+├── LEDs 
 └── Cartes RFID d'autorisation
 ```
 
-#### ESP8266 Récepteur (Population)
+#### ESP8266 Récepteur 
 ```
 Composants requis:
-├── ESP8266 (NodeMCU/Wemos D1 Mini)
+├── ESP8266
 ├── Module récepteur 433MHz
-└── LED d'alerte (intégrée + externe)
+└── LED d'alerte 
+└── Buzzer
 ```
 
 ### 2. Installation Arduino/ESP8266
@@ -66,56 +67,25 @@ Installez ces bibliothèques :
      {0x0B, 0xE6, 0x8C, 0x33}   // Remplacez par votre carte 2
    };
    ```
-3. **Vérifiez le câblage** :
-   ```
-   RFID RC522:    ESP8266:
-   SDA     ───────  D2 (GPIO4)
-   SCK     ───────  D5 (GPIO14)
-   MOSI    ───────  D7 (GPIO13)
-   MISO    ───────  D6 (GPIO12)
-   RST     ───────  D3 (GPIO0)
-   3.3V    ───────  3.3V
-   GND     ───────  GND
-
-   433MHz TX:     ESP8266:
-   DATA    ───────  D1 (GPIO5)
-   VCC     ───────  5V
-   GND     ───────  GND
-
-   LEDs (optionnel):
-   LED Verte ─────  D0 (GPIO16)
-   LED Rouge ─────  D4 (GPIO2)
-   ```
-4. Sélectionnez votre carte ESP8266 et le port COM
-5. Téléversez le code
+3. Sélectionnez votre carte ESP8266 et le port COM
+4. Uploadez le code
 
 #### Étape 4: Configuration ESP8266 Récepteur
 1. Ouvrez `recepteur.cpp` dans Arduino IDE
-2. **Vérifiez le câblage** :
-   ```
-   433MHz RX:     ESP8266:
-   DATA    ───────  D2 (GPIO4)
-   VCC     ───────  5V
-   GND     ───────  GND
+2. Sélectionnez votre carte ESP8266 et le port COM
+3. Uploadez le code
 
-   LEDs:
-   LED Interne ───  D4 (GPIO2) - intégrée
-   LED Externe ───  D1 (GPIO5) - optionnel
-   ```
-3. Sélectionnez votre carte ESP8266 et le port COM
-4. Téléversez le code
+### 3. Installation des Applications 
 
-### 3. Installation des Applications Windows
-
-#### Interface Gouvernementale
-1. **Copiez** `WAVE_Connect_Gov.exe` sur le poste gouvernemental
+#### Interface Emetteur
+1. **Copiez** `WAVE_Connect_Gov.exe` 
 2. **Connectez** l'ESP8266 émetteur en USB
 3. **Lancez** `WAVE_Connect_Gov.exe`
-4. **Configurez** le port COM (ex: COM4)
+4. **Configurez** le port COM (ex: COM4) selon le port USB branché
 5. **Testez** la connexion avec le bouton "TESTER CONNEXION"
 
-#### Interface de Réception
-1. **Copiez** `WAVE_Recepteur.exe` sur le poste de monitoring
+#### Interface Récepteur
+1. **Copiez** `WAVE_Recepteur.exe` 
 2. **Connectez** l'ESP8266 récepteur en USB
 3. **Lancez** `WAVE_Recepteur.exe`
 4. **Configurez** le port COM (ex: COM8)
@@ -123,48 +93,22 @@ Installez ces bibliothèques :
 
 ## Utilisation
 
-### Émission d'Alerte (Gouvernement)
+### Émission d'Alerte
 1. **Connectez-vous** au système via l'interface
-2. **Rédigez** votre message d'alerte (max 200 caractères)
+2. **Rédigez** votre message d'alerte (max 50 caractères)
 3. **Cliquez** sur "ÉTABLIR MESSAGE ET ATTENDRE CARTE"
 4. **Passez** votre carte RFID autorisée sur le lecteur
 5. **Succès** : Message "CARTE VALIDÉE - MESSAGE ENVOYÉ"
 6. **Échec** : Message "CARTE REFUSÉE"
 
-### Réception d'Alerte (Population)
+### Réception d'Alerte
 1. **Surveillez** l'interface de réception
 2. **Alerte reçue** :
    - LED clignote sur l'ESP8266
    - Message apparaît avec alerte dans la liste
-   - Son d'alerte (si configuré)
+   - Son d'alerte
 3. **Lecture du message** :
    - Sélectionnez le message dans la liste
    - Cliquez "STOP ALERTE"
    - LED s'arrête de clignoter
    - Message passe à "alerte arrêtée"
-
-## Dépannage
-
-
-### Problèmes de Communication 433MHz
-```
-Messages non reçus :
-- Vérifiez la distance (max ~5)
-- Contrôlez l'alimentation des modules 433MHz
-- Vérifiez les antennes
-```
-
-### Problèmes RFID
-```
-Carte non reconnue :
-- Vérifiez le câblage du module RC522
-- Lisez l'UID avec Arduino IDE (moniteur série)
-- Mettez à jour les UIDs autorisés dans le code
-- Redémarrez l'ESP8266
-```
-
-
-
-## Classification
-**USAGE OFFICIEL** - Système destiné aux autorités gouvernementales
-Nécessite une autorisation RFID valide pour l'émission d'alertes
