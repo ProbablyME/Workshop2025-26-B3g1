@@ -37,7 +37,9 @@ class WaveConnectGov:
 
         # Logo
         self.load_logo()
-        self.setup_main_ui()
+
+        # Configuration pour le scrolling
+        self.setup_scrollable_container()
 
     def load_logo(self):
         """Charge le logo officiel"""
@@ -62,10 +64,76 @@ class WaveConnectGov:
             img = Image.new('RGB', (120, 120), color='#1e40af')
             self.logo_image = ImageTk.PhotoImage(img)
 
+    def setup_scrollable_container(self):
+        """Configure un container scrollable pour toute l'interface"""
+        # Canvas principal avec scrollbars
+        self.main_canvas = tk.Canvas(self.root, bg=self.colors['bg'], highlightthickness=0)
+        self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Scrollbar verticale
+        v_scrollbar = tk.Scrollbar(self.root, orient=tk.VERTICAL, command=self.main_canvas.yview)
+        v_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Scrollbar horizontale
+        h_scrollbar = tk.Scrollbar(self.root, orient=tk.HORIZONTAL, command=self.main_canvas.xview)
+        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X, before=v_scrollbar)
+
+        # Configuration du canvas
+        self.main_canvas.configure(
+            yscrollcommand=v_scrollbar.set,
+            xscrollcommand=h_scrollbar.set
+        )
+
+        # Frame conteneur pour tout le contenu
+        self.scrollable_frame = tk.Frame(self.main_canvas, bg=self.colors['bg'])
+
+        # Créer une fenêtre dans le canvas
+        self.canvas_window = self.main_canvas.create_window(0, 0, anchor="nw", window=self.scrollable_frame)
+
+        # Bind pour mettre à jour la scrollregion quand le contenu change
+        self.scrollable_frame.bind('<Configure>', self.on_frame_configure)
+
+        # Bind pour ajuster la largeur du frame au canvas
+        self.main_canvas.bind('<Configure>', self.on_canvas_configure)
+
+        # Bind la molette de souris pour le scroll vertical
+        self.bind_mouse_scroll()
+
+        # Maintenant configurer l'UI dans le frame scrollable
+        self.setup_main_ui()
+
+    def on_frame_configure(self, event=None):
+        """Met à jour la scrollregion du canvas quand le frame change de taille"""
+        self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
+
+    def on_canvas_configure(self, event):
+        """Ajuste la largeur du frame intérieur pour correspondre au canvas"""
+        canvas_width = event.width
+        self.main_canvas.itemconfig(self.canvas_window, width=canvas_width)
+
+    def bind_mouse_scroll(self):
+        """Bind la molette de souris pour le défilement"""
+        # Windows et Linux
+        self.main_canvas.bind_all("<MouseWheel>", self.on_mousewheel)
+        # Linux alternatif
+        self.main_canvas.bind_all("<Button-4>", self.on_mousewheel)
+        self.main_canvas.bind_all("<Button-5>", self.on_mousewheel)
+
+    def on_mousewheel(self, event):
+        """Gère le défilement avec la molette de souris"""
+        # Windows
+        if event.delta:
+            self.main_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        # Linux
+        elif event.num == 4:
+            self.main_canvas.yview_scroll(-1, "units")
+        elif event.num == 5:
+            self.main_canvas.yview_scroll(1, "units")
+
     def setup_main_ui(self):
         """Interface principale de saisie"""
-        # Header officiel (plus compact)
-        header_frame = tk.Frame(self.root, bg=self.colors['primary'], height=60)
+        # Header officiel (plus compact) - maintenant dans le frame scrollable
+        header_frame = tk.Frame(self.scrollable_frame, bg=self.colors['primary'], height=60)
         header_frame.pack(fill=tk.X)
         header_frame.pack_propagate(False)
 
@@ -92,7 +160,7 @@ class WaveConnectGov:
         subtitle_label.pack(anchor='w', pady=(2, 0))
 
         # Contenu principal
-        main_content = tk.Frame(self.root, bg=self.colors['bg'])
+        main_content = tk.Frame(self.scrollable_frame, bg=self.colors['bg'])
         main_content.pack(expand=True, fill='both', padx=20, pady=15)
 
         # Section d'information (compacte)
@@ -160,7 +228,7 @@ class WaveConnectGov:
                 font=('Segoe UI', 14, 'bold'),
                 fg=self.colors['secondary'], bg=self.colors['card']).pack(anchor='w')
 
-        tk.Label(input_content, text="Rédigez votre message d'urgence (maximum 200 caractères) :",
+        tk.Label(input_content, text="Rédigez votre message d'urgence (maximum 50 caractères) :",
                 font=('Segoe UI', 10),
                 fg=self.colors['text_light'], bg=self.colors['card']).pack(anchor='w', pady=(5, 10))
 
@@ -176,7 +244,7 @@ class WaveConnectGov:
         self.message_text.pack(fill=tk.BOTH, expand=True)
 
         # Compteur de caractères
-        self.char_counter = tk.Label(input_content, text="0 / 200 caractères",
+        self.char_counter = tk.Label(input_content, text="0 / 50 caractères",
                                     font=('Segoe UI', 9),
                                     fg=self.colors['text_light'], bg=self.colors['card'])
         self.char_counter.pack(anchor='e', pady=(5, 10))
@@ -220,10 +288,10 @@ class WaveConnectGov:
         self.message_status.pack(pady=(8, 0))
 
         # Footer officiel
-        footer = tk.Frame(self.root, bg=self.colors['border'], height=1)
+        footer = tk.Frame(self.scrollable_frame, bg=self.colors['border'], height=1)
         footer.pack(fill=tk.X)
 
-        footer_text = tk.Label(self.root, text="Classification: USAGE OFFICIEL • Autorisation requise",
+        footer_text = tk.Label(self.scrollable_frame, text="Classification: USAGE OFFICIEL • Autorisation requise",
                               font=('Segoe UI', 9),
                               fg=self.colors['text_light'], bg=self.colors['bg'])
         footer_text.pack(pady=10)
@@ -233,9 +301,9 @@ class WaveConnectGov:
         content = self.message_text.get(1.0, tk.END).strip()
         char_count = len(content)
 
-        self.char_counter.configure(text=f"{char_count} / 200 caractères")
+        self.char_counter.configure(text=f"{char_count} / 50 caractères")
 
-        if char_count > 200:
+        if char_count > 50:
             self.char_counter.configure(fg=self.colors['danger'])
         elif char_count > 180:
             self.char_counter.configure(fg=self.colors['warning'])
@@ -249,7 +317,7 @@ class WaveConnectGov:
             try:
                 self.serial_connection = serial.Serial(
                     port=port,
-                    baudrate=115200,
+                    baudrate=11550,
                     timeout=0.1
                 )
                 self.connected = True
@@ -307,8 +375,8 @@ class WaveConnectGov:
             self.root.after(3000, lambda: self.card_status_label.configure(text=""))
             return
 
-        if len(message) > 200:
-            self.card_status_label.configure(text="⚠️ MESSAGE TROP LONG (MAX 200)", fg=self.colors['danger'])
+        if len(message) > 50:
+            self.card_status_label.configure(text="⚠️ MESSAGE TROP LONG (MAX 50)", fg=self.colors['danger'])
             self.root.after(3000, lambda: self.card_status_label.configure(text=""))
             return
 
@@ -404,7 +472,7 @@ class WaveConnectGov:
         self.card_status_label.configure(text="⚪ MESSAGE ANNULÉ", fg=self.colors['text_light'])
         self.root.after(3000, lambda: self.card_status_label.configure(text=""))
 
-def show_error(self):
+    def show_error(self):
         """Affiche l'erreur d'autorisation"""
         # Affiche le message d'erreur dans le label
         self.card_status_label.configure(text="❌ CARTE REFUSÉE",
